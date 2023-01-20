@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Setup LXD
         uses: canonical/setup-lxd@main
