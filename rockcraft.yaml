@@ -28,13 +28,14 @@ parts:
     stage-snaps:
       - zookeeper/3.6/edge
     organize:
-      usr : urs_old
+      usr : usr_old
     override-build: |
       ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
         $CRAFT_PART_INSTALL/usr/bin/java
       ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/keytool \
         $CRAFT_PART_INSTALL/usr/bin/keytool
     organize:
+      usr : usr_old
       LICENSE.txt : opt/zookeeper/LICENSE.txt
       NOTICE.txt : opt/zookeeper/NOTICE.txt
       README.md : opt/zookeeper/README.md
@@ -50,10 +51,25 @@ parts:
     override-prime: |
       craftctl default
       rm -vf usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
+  java:
+    plugin: nil
+    after: [zookeeper]
+    stage-packages:
+      - openjdk-8-jre-headless
+    build-environment:
+      - JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/
+    override-build: |
+      ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
+        $CRAFT_PART_INSTALL/usr/bin/java
+      ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/keytool \
+        $CRAFT_PART_INSTALL/usr/bin/keytool
+    override-prime: |
+      craftctl default
+      rm -vf usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
 
   non-root-user:
         plugin: nil
-        after: [zookeeper]
+        after: [java]
         overlay-script: |
           # Create a user in the $CRAFT_OVERLAY chroot
           groupadd -R $CRAFT_OVERLAY -g 1000 zookeeper
