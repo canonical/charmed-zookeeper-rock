@@ -6,7 +6,7 @@ description: |
   ZooKeeper is a centralized service for maintaining configuration
   information, naming, providing distributed synchronization, and
   providing group services.
-version: "3.6.4"
+version: "3.6.3"
 base: ubuntu:22.04
 license: Apache-2.0
 
@@ -26,27 +26,39 @@ parts:
     build-environment:
       - JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/
     stage-snaps:
-      - zookeeper/latest/edge
-
+      - zookeeper/3.6/edge
+    organize:
+      usr : urs_old
     override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/opt/zookeeper/logs
       ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
         $CRAFT_PART_INSTALL/usr/bin/java
       ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/keytool \
         $CRAFT_PART_INSTALL/usr/bin/keytool
+    organize:
+      LICENSE.txt : opt/zookeeper/LICENSE.txt
+      NOTICE.txt : opt/zookeeper/NOTICE.txt
+      README.md : opt/zookeeper/README.md
+      README_packaging.md : opt/zookeeper/README_packaging.md
+      bin : opt/zookeeper/bin
+      conf : opt/zookeeper/conf
+      docs : opt/zookeeper/docs
+      etc : opt/zookeeper/etc
+      lib : opt/zookeeper/lib
+      with_config.sh : opt/zookeeper/with_config.sh
+      jmx_prometheus_javaagent.jar : opt/zookeeper/jmx_prometheus_javaagent.jar
+      jmx_prometheus.yaml :  opt/zookeeper/conf/jmx_prometheus.yaml
     override-prime: |
       craftctl default
       rm -vf usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
+
   non-root-user:
-    plugin: nil
-    after: [zookeeper]
-    overlay-script: |
-      # Create a user in the $CRAFT_OVERLAY chroot
-      groupadd -R $CRAFT_OVERLAY -g 1000 zookeeper
-      useradd -R $CRAFT_OVERLAY -M -r -g zookeeper -u 1000 zookeeper
-    override-prime: |
-      craftctl default
-      # Give permission to the required folder
-      chown -R 1000:1000 opt/zookeeper
-      chown -R 1000:1000 datalog
-      chown -R 1000:1000 data
+        plugin: nil
+        after: [zookeeper]
+        overlay-script: |
+          # Create a user in the $CRAFT_OVERLAY chroot
+          groupadd -R $CRAFT_OVERLAY -g 1000 zookeeper
+          useradd -R $CRAFT_OVERLAY -M -r -g zookeeper -u 1000 zookeeper
+        override-prime: |
+          craftctl default
+          # Give permission to the required folder
+          chown -R 1000:1000 opt/zookeeper
