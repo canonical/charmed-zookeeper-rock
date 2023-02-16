@@ -42,9 +42,6 @@ parts:
       with_config.sh : opt/zookeeper/with_config.sh
       jmx_prometheus_javaagent.jar : opt/zookeeper/jmx_prometheus_javaagent.jar
       jmx_prometheus.yaml :  opt/zookeeper/conf/jmx_prometheus.yaml
-    override-prime: |
-      craftctl default
-      rm -vf usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
   java:
     plugin: nil
     after: [zookeeper]
