@@ -6,7 +6,7 @@ description: |
   ZooKeeper is a centralized service for maintaining configuration
   information, naming, providing distributed synchronization, and
   providing group services.
-version: "3.6.3"
+version: "3.6.4"
 base: ubuntu:22.04
 license: Apache-2.0
 
@@ -27,15 +27,9 @@ parts:
       - JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/
     stage-snaps:
       - zookeeper/3.6/edge
-    organize:
-      usr : usr_old
     override-build: |
-      ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
-        $CRAFT_PART_INSTALL/usr/bin/java
-      ln -s /usr/lib/jvm/java-8-openjdk-amd64/bin/keytool \
-        $CRAFT_PART_INSTALL/usr/bin/keytool
+      rm -rf usr/
     organize:
-      usr : usr_old
       LICENSE.txt : opt/zookeeper/LICENSE.txt
       NOTICE.txt : opt/zookeeper/NOTICE.txt
       README.md : opt/zookeeper/README.md
