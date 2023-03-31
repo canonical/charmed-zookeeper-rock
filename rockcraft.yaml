@@ -1,15 +1,20 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
-
-name: charmed-zookeeper # the name of your ROCK
-base: ubuntu:22.04 # the base environment for this ROCK
-version: '3.6.4' # just for humans. Semantic versioning is recommended
-summary: Charmed ZooKeeper ROCK OCI # 79 char long summary
+---
+name: charmed-zookeeper  # the name of your ROCK
+base: ubuntu:22.04  # the base environment for this ROCK
+version: '3.6.4'  # just for humans. Semantic versioning is recommended
+summary: Charmed ZooKeeper ROCK OCI  # 79 char long summary
 description: |
-  This is an OCI image that bundles Apache ZooKeeper together with other tools of its ecosystem in order to be used in Charmed Operators, providing automated operations management from day 0 to day 2 on the Apache ZooKeeper distributed coodrdinator, on top of a Virtual Machine cluster and K8s cluster. It is an open source, end-to-end, production ready data platform on top of cloud native technologies.
-license: Apache-2.0 # your application's SPDX license
+  This is an OCI image that bundles Apache ZooKeeper together with other tools
+  of its ecosystem in order to be used in Charmed Operators, providing
+  automated operations management from day 0 to day 2 on the Apache ZooKeeper
+  distributed coodrdinator, on top of a Virtual Machine cluster and K8s cluster.
+  It is an open source, end-to-end, production ready data platform on top of
+  cloud native technologies.
+license: Apache-2.0  # your application's SPDX license
 
-platforms: # The platforms this ROCK should be built on and run on
+platforms:  # The platforms this ROCK should be built on and run on
   amd64:
 
 env:
