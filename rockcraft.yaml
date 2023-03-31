@@ -13,14 +13,14 @@ platforms: # The platforms this ROCK should be built on and run on
   amd64:
 
 env:
-  JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-  ZOO_LOG_DIR: /var/log/zookeeper
-  ZOO_LOG4J_PROP: INFO,CONSOLE,ROLLINGFILE
-  ZOO_LOG_FILE: zookeeper.log
-  ZOOCFGDIR: /etc/zookeeper
+  - JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+  - ZOO_LOG_DIR: /var/log/zookeeper
+  - ZOO_LOG4J_PROP: INFO,CONSOLE,ROLLINGFILE
+  - ZOO_LOG_FILE: zookeeper.log
+  - ZOOCFGDIR: /etc/zookeeper
 
 parts:
-  zookeepr:
+  zookeeper:
     plugin: nil
     stage-packages:
       - openjdk-17-jre-headless
@@ -39,6 +39,8 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/var/lib/pebble/default/
       mkdir -p $CRAFT_PART_INSTALL/var/lib/zookeeper/
       mkdir -p $CRAFT_PART_INSTALL/var/log/zookeeper/
+      mkdir -p $CRAFT_PART_INSTALL/opt/zookeeper/
+      mkdir -p $CRAFT_PART_INSTALL/etc/zookeeper/
     override-prime: |
       craftctl default
       rm -vf usr/lib/jvm/java-17-openjdk-amd64/lib/security/cacerts
@@ -52,7 +54,7 @@ parts:
     override-prime: |
       craftctl default
       # Give permission ot the required folders
-      chown -R 1000:1000 /opt/zookeeper
-      chown -R 1000:1000 /var/lib/zookeeper
-      chown -R 1000:1000 /var/log/zookeeper
-      chown -R 1000:1000 /etc/zookeeper
+      chown -R 1000:1000 opt/zookeeper
+      chown -R 1000:1000 var/lib/zookeeper
+      chown -R 1000:1000 var/log/zookeeper
+      chown -R 1000:1000 etc/zookeeper
