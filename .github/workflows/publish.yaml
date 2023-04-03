@@ -2,7 +2,7 @@ name: Publish ROCK
 on:
   push:
     branches:
-      - main
+      - 3-22.04
 
 jobs:
   build:
@@ -41,8 +41,15 @@ jobs:
         run: |
           version=$(yq '(.version|split("-"))[0]' rockcraft.yaml)
           base=$(yq '(.base|split(":"))[1]' rockcraft.yaml)
-          tag=${version}-${base}_edge
+          risk=edge
+          tag=${version}-${base}_${risk}
+          channel_version=$(${{ github.ref_name }} | cut -d "-" -f 1)
+
           sudo skopeo --insecure-policy copy \
-            oci-archive:charmed-kafka_${tag}_amd64.rock \
+            oci-archive:charmed-zookeeper_${tag}_amd64.rock \
             docker-daemon:ghcr.io/canonical/charmed-zookeeper:${tag}
+
+          docker tag ghcr.io/canonical/charmed-zookeeper:${tag} ghcr.io/canonical/charmed-zookeeper:${channel_version}-${risk}
+
           docker push ghcr.io/canonical/charmed-zookeeper:${tag}
+          docker push ghcr.io/canonical/charmed-zookeeper:${channel_version}-${risk}
