@@ -59,7 +59,9 @@ parts:
     override-prime: |
       craftctl default
       # Give permissions to the required folders
-      chown -R 1000:1000 opt/zookeeper
-      chown -R 1000:1000 var/lib/zookeeper
-      chown -R 1000:1000 var/log/zookeeper
-      chown -R 1000:1000 etc/zookeeper
+      install -d -o 1000 -g 1000 -m 770 \
+        opt/zookeeper \
+        var/lib/zookeeper \
+        var/log/zookeeper \
+        etc/zookeeper
+
