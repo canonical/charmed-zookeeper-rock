@@ -64,4 +64,3 @@ parts:
         var/lib/zookeeper \
         var/log/zookeeper \
         etc/zookeeper
-
