@@ -85,6 +85,7 @@ jobs:
 
           docker run -d -p 2181:2181 charmed-zookeeper:latest
 
+          sleep 10 
           #- name: Test Service is Up and Running
           #  run: |
           CHECK=$(echo srvr | nc localhost 2181 | grep "Mode" | wc -l)
