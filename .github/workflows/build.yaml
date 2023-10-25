@@ -74,7 +74,7 @@ jobs:
           sudo snap install --devmode --channel edge skopeo
       - uses: actions/download-artifact@v3
         with:
-          name: charmed-kafka
+          name: charmed-zookeeper
       - name: Start Service
         run: |
 
