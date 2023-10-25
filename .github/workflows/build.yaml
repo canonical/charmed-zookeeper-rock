@@ -8,7 +8,7 @@ on:
   pull_request:
   workflow_call:
     outputs:
-      snap-file:
+      rock:
         description: "The rock output of build process."
         value: ${{ jobs.build.outputs.rock }}
 
@@ -35,9 +35,10 @@ jobs:
       - name: Setup LXD
         uses: canonical/setup-lxd@main
       - name: Install dependencies
+        id: install
         run: |
           sudo snap install yq
-          sudo snap install rockcraft --classic --edge --revision 687
+          sudo snap install rockcraft --classic --edge
       - name: Build ROCK
         id: build
         run: |
