@@ -85,9 +85,11 @@ jobs:
 
           docker run -d -p 2181:2181 charmed-zookeeper:latest
 
-      - name: Test Service is Up and Running
-        run: |
+      #- name: Test Service is Up and Running
+      #  run: |
           CHECK=$(echo srvr | nc localhost 2181 | grep "Mode" | wc -l)
+       
+          echo $CHECK
           
           if [[ $CHECK != 1 ]]; then exit 1; fi 
 
