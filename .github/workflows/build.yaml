@@ -89,5 +89,5 @@ jobs:
         run: |
           CHECK=$(echo srvr | nc localhost 2181 | grep "Mode" | wc -l)
           
-          if [[ $A != 1 ]]; then exit 1; fi 
+          if [[ $CHECK != 1 ]]; then exit 1; fi 
 
