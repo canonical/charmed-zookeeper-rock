@@ -55,7 +55,8 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/opt/zookeeper/
       mkdir -p $CRAFT_PART_INSTALL/etc/zookeeper/
 
-      cp $CRAFT_PART_INSTALL/conf/zoo_sample.cfg $CRAFT_PART_INSTALL/etc/zookeeper/zoo.cfg
+      cp $CRAFT_PART_INSTALL/conf/zoo_sample.cfg \
+        $CRAFT_PART_INSTALL/etc/zookeeper/zoo.cfg
       rm -rf $CRAFT_PART_INSTALL/conf
     override-prime: |
       craftctl default
