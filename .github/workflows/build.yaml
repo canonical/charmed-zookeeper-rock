@@ -1,4 +1,4 @@
-name: Build New ROCK
+name: Build ROCK
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
