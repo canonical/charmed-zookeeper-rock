@@ -76,7 +76,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: charmed-zookeeper
-      - name: Start Service
+      - name: Test Image
         run: |
 
           sudo skopeo --insecure-policy copy \
@@ -86,11 +86,12 @@ jobs:
           docker run -d -p 2181:2181 charmed-zookeeper:latest
 
           sleep 10 
-          #- name: Test Service is Up and Running
-          #  run: |
           CHECK=$(echo srvr | nc localhost 2181 | grep "Mode" | wc -l)
        
-          echo $CHECK
-          
-          if [[ $CHECK != 1 ]]; then exit 1; fi 
-
+          if [[ $CHECK != 1 ]]; 
+          then 
+            echo "Zookeeper service possibly not running"
+            exit 1; 
+          else
+            echo "Zookeeper service up and running!"
+          fi 
