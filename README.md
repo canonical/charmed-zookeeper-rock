@@ -1,4 +1,7 @@
 # Zookeeper ROCK
+
+[![Release](https://github.com/canonical/charmed-zookeeper-rock/actions/workflows/publish.yaml/badge.svg)](https://github.com/canonical/charmed-zookeeper-rock/actions/workflows/publish.yaml)
+
 This repository contains the packaging metadata for creating a ROCK of Zookeeper built from the official Zookeeper release artifacts.  For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft). 
 
 ## Building the ROCK
