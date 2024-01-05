@@ -25,7 +25,9 @@ environment:
 services:
   zookeeper:
     override: replace
-    command: /opt/zookeeper/bin/zkServer.sh --config /etc/zookeeper start-foreground
+    command: >
+      /opt/zookeeper/bin/zkServer.sh
+      --config /etc/zookeeper start-foreground
     startup: enabled
     user: zookeeper
     group: zookeeper
