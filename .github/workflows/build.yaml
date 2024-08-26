@@ -64,16 +64,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install skopeo
+      - name: Install dependencies
         run: |
-          sudo snap install --devmode --channel edge skopeo
+          sudo snap install rockcraft --classic --edge
       - uses: actions/download-artifact@v3
         with:
           name: charmed-zookeeper
       - name: Test Image
         run: |
 
-          sudo skopeo --insecure-policy copy \
+          sudo rockcraft.skopeo --insecure-policy copy \
             oci-archive:${{ needs.build.outputs.rock }} \
             docker-daemon:charmed-zookeeper:latest
 
