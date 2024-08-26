@@ -14,15 +14,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Install skopeo
+      - name: Install dependencies
         run: |
-          sudo snap install --devmode --channel edge skopeo
+          sudo snap install rockcraft --classic --edge
       - uses: actions/download-artifact@v3
         with:
           name: charmed-zookeeper
       - name: Import locally
         run: |
-          sudo skopeo --insecure-policy copy \
+          sudo rockcraft.skopeo --insecure-policy copy \
             oci-archive:${{ needs.build.outputs.rock }} \
             docker-daemon:trivy/charmed-zookeeper:test
 
