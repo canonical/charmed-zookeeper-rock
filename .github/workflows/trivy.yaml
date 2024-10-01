@@ -8,7 +8,7 @@ jobs:
   build:
     uses: ./.github/workflows/build.yaml
   scan:
-    name: Trivy scan
+    name: Trivy scan and SBOM generation
     needs: build
     runs-on: ubuntu-20.04
     steps:
