@@ -2,7 +2,7 @@
 # See LICENSE file for licensing details.
 ---
 name: charmed-zookeeper  # the name of your ROCK
-base: ubuntu@22.04  # the base environment for this ROCK
+base: ubuntu@24.04  # the base environment for this ROCK
 version: '3.9.2'  # just for humans. Semantic versioning is recommended
 summary: Charmed ZooKeeper ROCK OCI  # 79 char long summary
 description: |
@@ -13,6 +13,8 @@ description: |
   It is an open source, end-to-end, production ready data platform on top of
   cloud native technologies.
 license: Apache-2.0  # your application's SPDX license
+
+run-user: _daemon_
 
 platforms:  # The platforms this ROCK should be built on and run on
   amd64:
@@ -29,13 +31,12 @@ services:
       /opt/zookeeper/bin/zkServer.sh
       --config /etc/zookeeper start-foreground
     startup: enabled
-    user: zookeeper
-    group: zookeeper
 
 parts:
   zookeeper:
     plugin: nil
     stage-packages:
+      - base-files
       - openjdk-11-jre-headless
       - libpsl5
       - curl
@@ -61,17 +62,9 @@ parts:
     override-prime: |
       craftctl default
       rm -vf usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts
-  non-root-user:
-    plugin: nil
-    after: [zookeeper]
-    overlay-script: |
-      # Create a user in the $CRAFT_OVERLAY chroot
-      groupadd -R $CRAFT_OVERLAY -g 1000 zookeeper
-      useradd -R $CRAFT_OVERLAY -M -r -g zookeeper -u 1000 zookeeper
-    override-prime: |
-      craftctl default
-      # Give permissions to the required folders
-      install -d -o 1000 -g 1000 -m 770 \
+
+      ROCK_USER_UID=584792
+      install -d -o ${ROCK_USER_UID} -g ${ROCK_USER_UID} -m 770 \
         opt/zookeeper \
         var/lib/zookeeper \
         var/log/zookeeper \
