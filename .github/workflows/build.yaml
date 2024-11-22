@@ -73,6 +73,7 @@ jobs:
       - name: Test Image
         run: |
 
+
           sudo rockcraft.skopeo --insecure-policy copy \
             oci-archive:${{ needs.build.outputs.rock }} \
             docker-daemon:charmed-zookeeper:latest
