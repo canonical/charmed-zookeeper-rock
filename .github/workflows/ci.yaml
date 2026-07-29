@@ -1,0 +1,91 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+name: CI pipeline
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint rockcraft.yaml
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install tooling
+        run: sudo apt install tox yamllint
+
+      - name: Lint
+        run: |
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 150}}}" \
+            --no-warnings rockcraft.yaml
+
+  build-rock:
+    name: Build rock
+    needs: [lint]
+    uses: canonical/data-platform-workflows/.github/workflows/build_rock.yaml@v50.2.1
+
+  test:
+    name: Test Image
+    needs: [build-rock]
+    strategy:
+      matrix:
+        system:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.system.os }}
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo snap install rockcraft --classic
+
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ${{needs.build-rock.outputs.artifact-prefix}}-*
+          merge-multiple: true
+          path: charmed-zookeeper
+
+      - name: Test Image
+        run: |
+
+          sudo rockcraft.skopeo --insecure-policy copy \
+            oci-archive:$(find charmed-zookeeper -type f -name ${{ matrix.system.arch }}.rock) \
+            docker-daemon:charmed-zookeeper:${{ github.sha }}
+
+          docker run -d -p 2181:2181 "charmed-zookeeper:${{ github.sha }}"
+
+          sleep 10
+          CHECK=$(echo srvr | nc localhost 2181 | grep "Mode" | wc -l)
+
+          if [[ $CHECK != 1 ]];
+          then
+            echo "Zookeeper service possibly not running"
+            exit 1;
+          else
+            echo "Zookeeper service up and running!"
+          fi
+
+  trivy:
+    name: CVE Scanning
+    needs: [build-rock]
+    uses: ./.github/workflows/trivy.yaml
+    permissions:
+      contents: read
+      security-events: write

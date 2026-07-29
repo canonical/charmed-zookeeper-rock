@@ -1,60 +1,77 @@
-name: Trivy Security Scanner
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+name: Trivy scan
+
 on:
-  push:
-    branches:
-      - 3-22.04
-  pull_request:
+  workflow_call:
+    inputs:
+      submit_dependency_graph:
+        description: "Submit SBOM to GitHub Dependency Graph"
+        required: false
+        type: boolean
+        default: false
+
 jobs:
-  build:
-    uses: ./.github/workflows/build.yaml
   scan:
-    name: Trivy scan and SBOM generation
-    needs: build
-    runs-on: ubuntu-22.04
+    name: Trivy scan
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Install dependencies
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install rockcraft (for skopeo)
         run: |
-          sudo snap install rockcraft --classic --edge
-      - uses: actions/download-artifact@v3
+          sudo snap install rockcraft --classic
+
+      - name: Download artifact
+        uses: actions/download-artifact@v8
         with:
-          name: charmed-zookeeper
-      - name: Import locally
+          pattern: ${{ needs.build.outputs.artifact-prefix }}-*
+          merge-multiple: true
+          path: charmed-zookeeper
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: .cache/trivy
+          key: ${{ runner.os }}-trivy-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-
+
+      - name: Import image locally
         run: |
-          sudo rockcraft.skopeo --insecure-policy copy \
-            oci-archive:${{ needs.build.outputs.rock }} \
-            docker-daemon:trivy/charmed-zookeeper:test
+          rockcraft.skopeo --insecure-policy copy \
+            docker-archive:$(find charmed-zookeeper -type f -name "*.rock") \
+            docker-daemon:trivy/charmed-zookeeper-${{ matrix.arch }}:${{ github.sha }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
+        # v0.36.0
         with:
-          image-ref: 'trivy/charmed-zookeeper:test'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'MEDIUM,HIGH,CRITICAL'
+          image-ref: "trivy/charmed-zookeeper-${{ matrix.arch }}:${{ github.sha }}"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "MEDIUM,HIGH,CRITICAL"
+          trivyignores: .trivyignore
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
+          category: ${{ matrix.arch }}
 
       - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
+        # v0.36.0
+        if: ${{ inputs.submit_dependency_graph }}
         with:
-          scan-type: 'image'
-          format: 'spdx-json'
-          output: 'dependency-results.sbom.json'
-          image-ref: 'trivy/charmed-zookeeper:test'
+          scan-type: "image"
+          format: "github"
+          output: "dependency-results-${{ matrix.arch }}.sbom.json"
+          image-ref: "trivy/charmed-zookeeper-${{ matrix.arch }}:${{ github.sha }}"
           github-pat: ${{ secrets.GITHUB_TOKEN }}
-          severity: "MEDIUM,HIGH,CRITICAL"
-          scanners: "vuln"
-
-      - name: Upload trivy report as a Github artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-sbom-report
-          path: '${{ github.workspace }}/dependency-results.sbom.json'
-          retention-days: 90
-
