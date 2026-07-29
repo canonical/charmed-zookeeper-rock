@@ -1,10 +1,10 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
 ---
-name: charmed-zookeeper  # the name of your ROCK
-base: ubuntu@22.04  # the base environment for this ROCK
-version: '3.9.2'  # just for humans. Semantic versioning is recommended
-summary: Charmed ZooKeeper ROCK OCI  # 79 char long summary
+name: charmed-zookeeper
+base: ubuntu@22.04
+version: "3.9.2"
+summary: Charmed ZooKeeper ROCK OCI
 description: |
   This is an OCI image that bundles Apache ZooKeeper together with other tools
   of its ecosystem in order to be used in Charmed Operators, providing
@@ -12,13 +12,16 @@ description: |
   distributed coodrdinator, on top of a Virtual Machine cluster and K8s cluster.
   It is an open source, end-to-end, production ready data platform on top of
   cloud native technologies.
-license: Apache-2.0  # your application's SPDX license
+license: Apache-2.0
 
-platforms:  # The platforms this ROCK should be built on and run on
+platforms:
   amd64:
+  arm64:
+
+run_user: _daemon_
 
 environment:
-  JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk-${CRAFT_ARCH_BUILD_FOR}
   ZOO_LOG_DIR: /var/log/zookeeper
   ZOOCFGDIR: /etc/zookeeper
 
@@ -29,8 +32,6 @@ services:
       /opt/zookeeper/bin/zkServer.sh
       --config /etc/zookeeper start-foreground
     startup: enabled
-    user: zookeeper
-    group: zookeeper
 
 parts:
   zookeeper:
@@ -39,19 +40,11 @@ parts:
       - openjdk-11-jre-headless
       - libpsl5
       - curl
-    build-environment:
-      - JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+    overlay-packages:
+      - openjdk-11-jre-headless
     stage-snaps:
       - charmed-zookeeper/3/edge
     override-build: |
-      ln -s /usr/lib/jvm/java-11-openjdk-amd64/bin/java \
-        $CRAFT_PART_INSTALL/usr/bin/java
-      ln -s /usr/lib/jvm/java-11-openjdk-amd64/bin/keytool \
-        $CRAFT_PART_INSTALL/usr/bin/keytool
-
-      mkdir -p $CRAFT_PART_INSTALL/var/lib/pebble/default/
-      mkdir -p $CRAFT_PART_INSTALL/var/lib/zookeeper/
-      mkdir -p $CRAFT_PART_INSTALL/var/log/zookeeper/
       mkdir -p $CRAFT_PART_INSTALL/opt/zookeeper/
       mkdir -p $CRAFT_PART_INSTALL/etc/zookeeper/
 
@@ -60,19 +53,24 @@ parts:
       rm -rf $CRAFT_PART_INSTALL/opt/zookeeper/conf
     override-prime: |
       craftctl default
-      rm -vf usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts
+      rm -vf usr/lib/jvm/java-11-openjdk-${CRAFT_ARCH_BUILD_FOR}/lib/security/cacerts
+
   non-root-user:
-    plugin: nil
     after: [zookeeper]
-    overlay-script: |
-      # Create a user in the $CRAFT_OVERLAY chroot
-      groupadd -R $CRAFT_OVERLAY -g 1000 zookeeper
-      useradd -R $CRAFT_OVERLAY -M -r -g zookeeper -u 1000 zookeeper
+    plugin: nil
     override-prime: |
+      ZOOKEEPER_GID=584792
+      ZOOKEEPER_UID=584792
+
       craftctl default
-      # Give permissions to the required folders
-      install -d -o 1000 -g 1000 -m 770 \
-        opt/zookeeper \
+
+      chown -R ${ZOOKEEPER_UID}:${ZOOKEEPER_GID} opt/zookeeper
+      chmod -R 750 opt/zookeeper
+
+      chown -R ${ZOOKEEPER_UID}:${ZOOKEEPER_GID} etc/zookeeper
+      chmod -R 750 etc/zookeeper
+
+      install -d -o ${ZOOKEEPER_UID} -g ${ZOOKEEPER_GID} -m 770 \
         var/lib/zookeeper \
         var/log/zookeeper \
         etc/zookeeper
