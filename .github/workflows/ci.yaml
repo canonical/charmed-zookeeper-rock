@@ -60,13 +60,12 @@ jobs:
         with:
           pattern: ${{needs.build-rock.outputs.artifact-prefix}}-*
           merge-multiple: true
-          path: charmed-zookeeper
 
       - name: Test Image
         run: |
 
           sudo rockcraft.skopeo --insecure-policy copy \
-            oci-archive:$(find charmed-zookeeper -type f -name ${{ matrix.system.arch }}.rock) \
+            oci-archive:$(find . -type f -name "*${{ matrix.system.arch }}.rock") \
             docker-daemon:charmed-zookeeper:${{ github.sha }}
 
           docker run -d -p 2181:2181 "charmed-zookeeper:${{ github.sha }}"
