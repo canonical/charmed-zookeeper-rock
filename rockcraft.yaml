@@ -40,8 +40,6 @@ parts:
       - openjdk-11-jre-headless
       - libpsl5
       - curl
-    overlay-packages:
-      - openjdk-11-jre-headless
     stage-snaps:
       - charmed-zookeeper/3/edge
     override-build: |
