@@ -22,6 +22,7 @@ run_user: _daemon_
 
 environment:
   JAVA_HOME: /usr/lib/jvm/java-11-openjdk-${CRAFT_ARCH_BUILD_FOR}
+  PATH: /usr/lib/jvm/java-11-openjdk-${CRAFT_ARCH_BUILD_FOR}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   ZOO_LOG_DIR: /var/log/zookeeper
   ZOOCFGDIR: /etc/zookeeper
 
